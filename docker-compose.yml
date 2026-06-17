@@ -7,16 +7,51 @@ services:
     environment:
       APP_REPO_BRANCH: main
       APP_REPO_URL: https://github.com/graddy2388/graddy_ai.git
+      APP_SYNC_SECONDS: 60
     command:
       - /bin/sh
       - -c
       - |
         set -eu
         apk add --no-cache git
-        rm -rf /tmp/graddy_ai /usr/share/nginx/html/*
-        git clone --depth=1 --branch "$${APP_REPO_BRANCH}" "$${APP_REPO_URL}" /tmp/graddy_ai
-        cp /tmp/graddy_ai/index.html /usr/share/nginx/html/index.html
-        cp /tmp/graddy_ai/styles.css /usr/share/nginx/html/styles.css
-        cp /tmp/graddy_ai/app.js /usr/share/nginx/html/app.js
+
+        cat > /etc/nginx/conf.d/default.conf <<'EOF'
+        server {
+          listen 80;
+          server_name _;
+          root /usr/share/nginx/html;
+          index index.html;
+
+          location / {
+            try_files $uri $uri/ /index.html;
+            add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;
+          }
+        }
+        EOF
+
+        sync_app() {
+          if [ ! -d /tmp/graddy_ai/.git ]; then
+            rm -rf /tmp/graddy_ai
+            git clone --depth=1 --branch "$${APP_REPO_BRANCH}" "$${APP_REPO_URL}" /tmp/graddy_ai
+          else
+            git -C /tmp/graddy_ai fetch --depth=1 origin "$${APP_REPO_BRANCH}"
+            git -C /tmp/graddy_ai reset --hard FETCH_HEAD
+          fi
+
+          rm -rf /usr/share/nginx/html/*
+          cp /tmp/graddy_ai/index.html /usr/share/nginx/html/index.html
+          cp /tmp/graddy_ai/styles.css /usr/share/nginx/html/styles.css
+          cp /tmp/graddy_ai/app.js /usr/share/nginx/html/app.js
+          git -C /tmp/graddy_ai rev-parse --short HEAD > /usr/share/nginx/html/version.txt
+        }
+
+        sync_app
+        (
+          while true; do
+            sleep "$${APP_SYNC_SECONDS}"
+            sync_app || true
+          done
+        ) &
+
         nginx -g "daemon off;"
     restart: unless-stopped
