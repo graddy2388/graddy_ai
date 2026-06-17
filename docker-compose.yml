@@ -1,10 +1,22 @@
 services:
   model-console:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ai-agent-dashboard:latest
+    image: nginx:1.27-alpine
     container_name: ai-agent-dashboard
     ports:
       - "${DASHBOARD_PORT:-4173}:80"
+    environment:
+      APP_REPO_BRANCH: main
+      APP_REPO_URL: https://github.com/graddy2388/graddy_ai.git
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        apk add --no-cache git
+        rm -rf /tmp/graddy_ai /usr/share/nginx/html/*
+        git clone --depth=1 --branch "$${APP_REPO_BRANCH}" "$${APP_REPO_URL}" /tmp/graddy_ai
+        cp /tmp/graddy_ai/index.html /usr/share/nginx/html/index.html
+        cp /tmp/graddy_ai/styles.css /usr/share/nginx/html/styles.css
+        cp /tmp/graddy_ai/app.js /usr/share/nginx/html/app.js
+        nginx -g "daemon off;"
     restart: unless-stopped
