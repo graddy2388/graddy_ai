@@ -1,10 +1,11 @@
 services:
   model-console:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ai-agent-dashboard:latest
+    image: nginx:1.27-alpine
     container_name: ai-agent-dashboard
     ports:
       - "${DASHBOARD_PORT:-4173}:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./styles.css:/usr/share/nginx/html/styles.css:ro
+      - ./app.js:/usr/share/nginx/html/app.js:ro
     restart: unless-stopped
