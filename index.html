@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Model Console</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Model navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z" />
+              <path d="M8 9.2 12 7l4 2.2v5.6L12 17l-4-2.2V9.2Z" />
+            </svg>
+          </div>
+          <div>
+            <h1>Model Console</h1>
+            <p>Unified prompt router</p>
+          </div>
+        </div>
+
+        <nav class="nav-stack" aria-label="Workspace sections">
+          <button class="nav-item active" type="button" data-view="console">
+            <span class="nav-icon" aria-hidden="true">C</span>
+            <span class="nav-label">Console</span>
+          </button>
+          <button class="nav-item" type="button" data-view="models">
+            <span class="nav-icon" aria-hidden="true">M</span>
+            <span class="nav-label">Models</span>
+          </button>
+          <button class="nav-item" type="button" data-view="routes">
+            <span class="nav-icon" aria-hidden="true">R</span>
+            <span class="nav-label">Routes</span>
+          </button>
+          <button class="nav-item" type="button" data-view="history">
+            <span class="nav-icon" aria-hidden="true">H</span>
+            <span class="nav-label">History</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span class="status-dot"></span>
+          <span>Local prototype</span>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Command layer</p>
+            <h2>Ask once, route anywhere</h2>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-button" id="newPromptButton" type="button" title="New prompt" aria-label="New prompt">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+            <button class="icon-button" id="exportButton" type="button" title="Export session" aria-label="Export session">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v12" />
+                <path d="m7 10 5 5 5-5" />
+                <path d="M5 21h14" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <section class="routing-strip" aria-label="Routing mode">
+          <button class="route-pill active" type="button" data-route="balanced">Balanced</button>
+          <button class="route-pill" type="button" data-route="fast">Fast</button>
+          <button class="route-pill" type="button" data-route="deep">Deep</button>
+          <button class="route-pill" type="button" data-route="compare">Compare</button>
+          <button class="route-pill" type="button" data-route="budget">Budget</button>
+        </section>
+
+        <section class="console-grid">
+          <div class="prompt-column">
+            <section class="selector-panel" aria-labelledby="selectorTitle">
+              <div class="selector-toolbar">
+                <div>
+                  <p class="eyebrow">Model selector</p>
+                  <h3 id="selectorTitle" class="pixel-title">Model Tower</h3>
+                </div>
+                <div class="selector-actions" aria-label="Model selection controls">
+                  <label class="mode-toggle">
+                    <input id="multiSelectToggle" type="checkbox" checked />
+                    <span>Multi-select</span>
+                  </label>
+                  <button class="secondary-button" type="button" id="selectAllButton">Select All</button>
+                  <button class="secondary-button" type="button" id="clearSelectionButton">Clear Selection</button>
+                </div>
+              </div>
+              <div class="selection-summary">
+                <strong id="tileSelectedSummary">4 models selected</strong>
+                <span id="selectedRoster">OpenAI, Claude, DeepSeek, Groq</span>
+              </div>
+              <div id="modelList" class="model-grid" aria-label="Available model tiles"></div>
+            </section>
+
+            <form class="prompt-panel" id="promptForm">
+              <div class="prompt-header">
+                <label for="promptInput">Prompt</label>
+                <span id="selectedCount">4 models selected</span>
+              </div>
+              <textarea id="promptInput" name="prompt" rows="9" placeholder="Type the request you want to send across your models..."></textarea>
+              <div class="prompt-controls">
+                <select id="taskType" aria-label="Task type">
+                  <option value="general">General</option>
+                  <option value="code">Code</option>
+                  <option value="research">Research</option>
+                  <option value="vision">Vision</option>
+                  <option value="local">Private/local</option>
+                </select>
+                <button class="primary-button" type="submit">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="m13 6 6 6-6 6" />
+                  </svg>
+                  Run prompt
+                </button>
+              </div>
+            </form>
+
+            <section class="output-panel" aria-live="polite">
+              <div class="section-heading">
+                <h3>Response workspace</h3>
+                <span id="runStatus">Ready</span>
+              </div>
+              <div id="responseList" class="response-list">
+                <article class="empty-state">
+                  <h4>No prompt run yet</h4>
+                  <p>Select a routing mode, choose the models you want, and run a prompt. This prototype simulates routing until real API connectors are added.</p>
+                </article>
+              </div>
+            </section>
+          </div>
+
+          <aside class="inspector" aria-label="Model inspector">
+            <section class="metrics-band">
+              <div class="metric-tile">
+                <span>Active</span>
+                <strong id="activeMetric">4</strong>
+              </div>
+              <div class="metric-tile">
+                <span>Est. cost</span>
+                <strong id="costMetric">$0.09</strong>
+              </div>
+              <div class="metric-tile">
+                <span>Latency</span>
+                <strong id="latencyMetric">8.3s</strong>
+              </div>
+            </section>
+
+            <section class="route-panel">
+              <div class="section-heading">
+                <h3>Route policy</h3>
+                <button class="text-button" type="button" id="selectRecommended">Recommended</button>
+              </div>
+              <div class="policy-row">
+                <span>Fallback</span>
+                <label class="switch">
+                  <input id="fallbackToggle" type="checkbox" checked />
+                  <span></span>
+                </label>
+              </div>
+              <div class="policy-row">
+                <span>Compare outputs</span>
+                <label class="switch">
+                  <input id="compareToggle" type="checkbox" />
+                  <span></span>
+                </label>
+              </div>
+              <div class="policy-row">
+                <span>Keep local copy</span>
+                <label class="switch">
+                  <input id="archiveToggle" type="checkbox" checked />
+                  <span></span>
+                </label>
+              </div>
+            </section>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

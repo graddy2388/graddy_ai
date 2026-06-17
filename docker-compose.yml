@@ -1,0 +1,10 @@
+services:
+  model-console:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-agent-dashboard:latest
+    container_name: ai-agent-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-4173}:80"
+    restart: unless-stopped
